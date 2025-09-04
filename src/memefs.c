@@ -59,11 +59,6 @@ memefs_dirent_t directory[MAX_DIR_ENTRIES];
 
 uint16_t fat_table[FAT_BLOCK_SIZE];        
 
-/******** TEMPORARY ********/
-//static const char* filepath = "/hello.txt";
-//static const char* filename = "hello.txt";
-//static const char* filecontent = "Hello World!\n";
-
 /****** HELPERS ******/
 int load_superblock() {
     if (img_fd < 0) return -EBADF;
@@ -499,7 +494,7 @@ int memefs_write(const char* path, const char* buf, size_t size, off_t off, stru
         }
     }
 
-    // Now write the data to the appropriate blocks
+    // Write the data to the appropriate blocks
     off_t bytes_written = 0;
     while (bytes_written < size) {
         if (current_block == 0xFFFF) {
@@ -538,7 +533,6 @@ int memefs_write(const char* path, const char* buf, size_t size, off_t off, stru
         bytes_written += to_write;
         file_offset += to_write;
 
-        // If we've written all the data, we are done
         if (bytes_written == size) {
             // Update file size in the directory entry
             file_entry->file_size = off + size;
@@ -604,7 +598,7 @@ int memefs_truncate(const char* path, off_t size, struct fuse_file_info* fi) {
                 current_block = fat_table[current_block];
             } 
             else {
-                // We are at the block to truncate, so free the remaining blocks in the chain
+                // Free the remaining blocks in the chain
                 if (lseek(img_fd, current_block * BLOCK_SIZE, SEEK_SET) < 0) {
                     return -EIO;
                 }
